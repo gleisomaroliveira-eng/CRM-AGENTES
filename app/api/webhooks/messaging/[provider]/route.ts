@@ -83,7 +83,18 @@ export async function POST(req: Request, ctx: { params: Promise<{ provider: stri
   }
 
   if (evolutionDebug) {
-    logError("messaging.webhook.verify_debug", evolutionDebug);
+    try {
+      console.error(`[messaging.webhook.verify_debug] ${JSON.stringify(evolutionDebug)}`);
+      // Log full headers and channel config for diagnostics (temporary)
+      console.error(`[messaging.webhook.verify_debug] headers: ${JSON.stringify(headers)}`);
+      if (channelConfig && typeof channelConfig === "object") {
+        console.error(
+          `[messaging.webhook.verify_debug] channelConfig: ${JSON.stringify(channelConfig)}`,
+        );
+      }
+    } catch (err) {
+      console.error("[messaging.webhook.verify_debug] failed to stringify debug", err);
+    }
   }
 
   const verified = adapter.verifyWebhook({ headers, rawBody, query }, channelConfig);
