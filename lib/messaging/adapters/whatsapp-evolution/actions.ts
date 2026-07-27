@@ -91,7 +91,7 @@ export async function connectEvolutionChannelAction(
   }
 
   const webhookSecret = crypto.randomBytes(32).toString("hex");
-  const webhookUrl = `${appUrl()}/api/webhooks/messaging/whatsapp_evolution`;
+  const webhookUrl = `${appUrl()}/api/webhooks/messaging/whatsapp_evolution?secret=${webhookSecret}`;
   try {
     await setWebhook(baseUrl, apiKey, instanceName, webhookUrl, webhookSecret);
   } catch (err) {
@@ -172,7 +172,7 @@ export async function reverifyEvolutionChannelAction(
       cfg.baseUrl,
       cfg.apiKey,
       cfg.instanceName,
-      `${appUrl()}/api/webhooks/messaging/whatsapp_evolution`,
+      `${appUrl()}/api/webhooks/messaging/whatsapp_evolution?secret=${newSecret}`,
       newSecret,
     );
   } catch (err) {

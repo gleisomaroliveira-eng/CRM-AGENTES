@@ -8,7 +8,7 @@ import { postJson } from "./client";
 import { extractFilename, mimeToMediaType, stripPlus } from "./extract-message";
 import { parseWebhook } from "./parse-webhook";
 import { evolutionConfigSchema, type EvolutionConfig } from "./schema";
-import { verifyBearer } from "./verify-webhook";
+import { verifyQuerySecret } from "./verify-webhook";
 
 function parseCfg(config: unknown): EvolutionConfig {
   return evolutionConfigSchema.parse(config);
@@ -87,8 +87,8 @@ export const evolutionAdapter: MessagingAdapter = {
     if (!channelConfig) return false;
     const cfg = evolutionConfigSchema.safeParse(channelConfig);
     if (!cfg.success) return false;
-    const auth = getAuthHeader(req.headers);
-    return verifyBearer(auth, cfg.data.webhookSecret);
+    // Evolution doesn't send Authorization header reliably — verify via query param `secret`
+    return verifyQuerySecret(req.query, cfg.data.webhookSecret);
   },
 
   parseWebhook,
