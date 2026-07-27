@@ -48,14 +48,12 @@ async function setWebhook(
   webhookSecret: string,
 ): Promise<void> {
   await postJson(`${baseUrl}/webhook/set/${instanceName}`, apiKey, {
-    webhook: {
-      enabled: true,
-      url: webhookUrl,
-      webhook_by_events: false,
-      webhook_base64: false,
-      headers: { Authorization: `Bearer ${webhookSecret}` },
-      events: ["MESSAGES_UPSERT", "MESSAGES_UPDATE", "CONNECTION_UPDATE"],
-    },
+    enabled: true,
+    url: webhookUrl,
+    webhookByEvents: false,
+    webhookBase64: false,
+    headers: { Authorization: `Bearer ${webhookSecret}` },
+    events: ["MESSAGES_UPSERT", "MESSAGES_UPDATE", "CONNECTION_UPDATE"],
   });
 }
 
