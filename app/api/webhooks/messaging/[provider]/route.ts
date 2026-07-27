@@ -45,6 +45,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ provider: stri
   // e RLS bloqueia a leitura de `channels`. Usa service client (bypassa RLS)
   // — bearer/HMAC do próprio webhook autentica a request.
   let channelConfig: unknown = undefined;
+  let evolutionDebug: Record<string, unknown> | undefined;
   if (provider === "whatsapp_cloud") {
     const phoneNumberId = extractWhatsappPhoneNumberId(rawBodyText);
     if (phoneNumberId) {
@@ -71,6 +72,18 @@ export async function POST(req: Request, ctx: { params: Promise<{ provider: stri
         .maybeSingle();
       channelConfig = data?.config;
     }
+    evolutionDebug = {
+      provider,
+      instanceName: extractEvolutionInstanceName(rawBodyText),
+      authorization: headers.authorization ?? headers.Authorization,
+      channelConfigFound: !!channelConfig,
+      hasWebhookSecret:
+        channelConfig && typeof channelConfig === "object" && "webhookSecret" in channelConfig,
+    };
+  }
+
+  if (evolutionDebug) {
+    logError("messaging.webhook.verify_debug", evolutionDebug);
   }
 
   const verified = adapter.verifyWebhook({ headers, rawBody, query }, channelConfig);
