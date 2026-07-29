@@ -29,6 +29,20 @@ export async function POST(req: Request, ctx: { params: Promise<{ provider: stri
   const rawBodyText = await req.text();
   const rawBody = Buffer.from(rawBodyText, "utf8");
 
+  // DEBUG: log raw webhook payload (temporary) so we can inspect Evolution's
+  // exact fields (including possible @lid payloads like senderPn/participant).
+  try {
+    let parsed: unknown = rawBodyText;
+    try {
+      parsed = JSON.parse(rawBodyText);
+    } catch {
+      // not JSON, leave as text
+    }
+    console.error("[webhook.raw.debug]", JSON.stringify(parsed, null, 2));
+  } catch (err) {
+    console.error("[webhook.raw.debug] failed to stringify body", err);
+  }
+
   const headers: Record<string, string> = {};
   req.headers.forEach((v, k) => {
     headers[k] = v;
