@@ -48,7 +48,7 @@ export const evolutionAdapter: MessagingAdapter = {
         cfg.apiKey,
         {
           number: to,
-          text: opts.body ?? "",
+          textMessage: { text: opts.body ?? "" },
           ...(opts.replyToExternalId
             ? { quoted: { key: { id: opts.replyToExternalId } } }
             : {}),
