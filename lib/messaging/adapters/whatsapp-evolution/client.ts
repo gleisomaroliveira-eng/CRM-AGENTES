@@ -23,7 +23,11 @@ export async function postJson<T = unknown>(
   });
   if (!res.ok) {
     const errBody = await safeJson(res);
-    throw new Error(mapEvolutionError(res.status, errBody));
+    const e = new Error(mapEvolutionError(res.status, errBody));
+    // Attach raw response body and status for richer logging by callers
+    (e as any).responseBody = errBody;
+    (e as any).status = res.status;
+    throw e;
   }
   return (await res.json()) as T;
 }
@@ -34,7 +38,10 @@ export async function getJson<T = unknown>(url: string, apiKey: string): Promise
   });
   if (!res.ok) {
     const errBody = await safeJson(res);
-    throw new Error(mapEvolutionError(res.status, errBody));
+    const e = new Error(mapEvolutionError(res.status, errBody));
+    (e as any).responseBody = errBody;
+    (e as any).status = res.status;
+    throw e;
   }
   return (await res.json()) as T;
 }

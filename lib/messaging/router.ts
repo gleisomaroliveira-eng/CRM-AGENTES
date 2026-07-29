@@ -111,6 +111,21 @@ export async function processSendOutbound(messageId: string): Promise<void> {
     if (upErr) logError("messaging.send-update", upErr);
   } catch (err) {
     logError("messaging.send", err);
+    // If the adapter/client attached the raw Evolution response body, log it
+    // verbosely so we can see validation details like "instance requires property X".
+    try {
+      const body = (err as any)?.responseBody;
+      const status = (err as any)?.status;
+      if (body !== undefined) {
+        console.error(
+          `[messaging.send] evolution.response (status=${status ?? "unknown"}): ${JSON.stringify(
+            body,
+          )}`,
+        );
+      }
+    } catch (e) {
+      /* ignore logging errors */
+    }
     await markFailed(messageId, translateError(err));
   }
 }
