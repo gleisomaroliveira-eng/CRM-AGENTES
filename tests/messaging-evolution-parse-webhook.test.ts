@@ -46,6 +46,23 @@ const FROMME_PAYLOAD = {
   },
 };
 
+const LID_PAYLOAD = {
+  event: "messages.upsert",
+  instance: "minha-empresa",
+  data: {
+    key: {
+      remoteJid: "277562295083102@lid",
+      participant: "5511999990000@s.whatsapp.net",
+      fromMe: false,
+      id: "LID-1",
+    },
+    pushName: "João",
+    message: { conversation: "Oi" },
+    messageType: "conversation",
+    messageTimestamp: 1717440400,
+  },
+};
+
 const STATUS_UPDATE_DELIVERED = {
   event: "messages.update",
   instance: "minha-empresa",
@@ -93,6 +110,16 @@ describe("parseWebhook — mensagens", () => {
     const events = parseWebhook(FROMME_PAYLOAD);
     expect(events).toHaveLength(1);
     expect(events[0]?.fromMe).toBe(true);
+  });
+
+  test("messages.upsert com remoteJid @lid resolve participant para telefone real", () => {
+    const events = parseWebhook(LID_PAYLOAD);
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({
+      kind: "message",
+      externalThreadId: "+5511999990000",
+      externalMessageId: "LID-1",
+    });
   });
 
   test("raw inclui instanceName pro lookup do router", () => {

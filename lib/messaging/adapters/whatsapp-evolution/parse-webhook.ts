@@ -36,10 +36,35 @@ function extractMessageContent(
   return {};
 }
 
+function resolveEvolutionRemoteJid(
+  data: Record<string, unknown>,
+  key: Record<string, unknown> | undefined,
+): string | null {
+  const rawRemoteJid =
+    typeof key?.remoteJid === "string"
+      ? key.remoteJid
+      : typeof data.remoteJid === "string"
+      ? data.remoteJid
+      : null;
+  if (!rawRemoteJid) return null;
+
+  if (!rawRemoteJid.endsWith("@lid")) return rawRemoteJid;
+
+  const participant = typeof key?.participant === "string" ? key.participant : null;
+  const message = data.message as Record<string, unknown> | undefined;
+  const messageKey = message?.key as Record<string, unknown> | undefined;
+  const messageParticipant =
+    typeof messageKey?.participant === "string" ? messageKey.participant : null;
+  const senderPn = typeof data.senderPn === "string" ? data.senderPn : null;
+  const messageSenderPn = typeof message?.senderPn === "string" ? message.senderPn : null;
+
+  return participant ?? messageParticipant ?? senderPn ?? messageSenderPn ?? rawRemoteJid;
+}
+
 function parseMessageUpsert(payload: Payload): NormalizedEvent[] {
   const data = payload.data ?? {};
   const key = data.key as Record<string, unknown> | undefined;
-  const remoteJid = typeof key?.remoteJid === "string" ? key.remoteJid : null;
+  const remoteJid = resolveEvolutionRemoteJid(data, key);
   const externalMessageId = typeof key?.id === "string" ? key.id : null;
   const fromMe = key?.fromMe === true;
   if (!remoteJid || !externalMessageId) return [];
